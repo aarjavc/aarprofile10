@@ -1,0 +1,17 @@
+[build]
+  command = "cd aarjav-site && npm install && npm run build"
+  publish = "aarjav-site/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -8,7 +8,7 @@ void motion;
 
 const ASSETS = {
   // User-specified local images
-  heroBg: "/about.jpg", 
+  heroBg: "/dist/aabout.jpg", 
   aboutImg: "/realAbout.jpg",
 };
 
@@ -252,7 +252,7 @@ const Hero = () => {
   const letters = "AARJAV".split("");
   
   return (
-    <section id="hero" className="relative h-screen w-full overflow-hidden flex items-center justify-center">
+    <section id="hero" className="relative h-screen w-screen overflow-hidden flex items-center justify-center">
       {/* Background with Slow Zoom */}
       <div className="absolute inset-0 overflow-hidden bg-black">
         <motion.div
@@ -265,10 +265,10 @@ const Hero = () => {
           <img 
             src={ASSETS.heroBg} 
             alt="Hero Background" 
-            className="w-full h-full object-cover object-left opacity-60 scale-[0.92] md:scale-110 blur-md md:blur-sm"
+            className="w-full h-full object-cover opacity-60 object-[center_-5%] scale-[0.92] md:scale-110 blur-sm"
             onError={(e) => {
               // Fallback if hero.jpg isn't found
-              e.target.src = "";
+              e.target.src = "https://images.unsplash.com/photo-1571266028243-371695039989?q=80&w=2535&auto=format&fit=crop";
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40" />
@@ -290,7 +290,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1 className="text-[15vw] md:text-[12vw] leading-[0.8] font-display font-bold text-[#ededed] tracking-tighter mix-blend-overlay">
+            <h1 className="text-[14vw] md:text-[12vw] leading-[0.85] font-display font-bold text-[#ededed] tracking-tight md:tracking-tighter mix-blend-overlay px-2">
               {letters.map((ch, idx) => (
                 <motion.span
                   key={`${ch}-${idx}`}
@@ -508,12 +508,20 @@ const Songs = () => {
             viewport={{ once: true }}
             className="flex items-end justify-between mb-16"
           >
-            <h2 className="text-[10vw] md:text-8xl font-display font-bold text-[#1a1a1a] select-none leading-none">
-              DISC<span className="text-white/10">OGRAPHY</span>
-            </h2>
-            <span className="hidden md:block text-[#d97706] font-display uppercase tracking-widest text-sm mb-4">
-              Latest Releases
-            </span>
+            <div className="flex flex-col items-center md:items-start md:flex-row md:justify-between md:w-full gap-4">
+              <h2 className="text-[10vw] md:text-8xl font-display font-bold text-[#1a1a1a] select-none leading-none text-center md:text-left">
+                ORIG<span className="text-white/10">INALS</span>
+              </h2>
+              <MagneticButton
+                href="https://soundcloud.com/aarjavchauhan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-white/15 text-white/80 text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all duration-300 md:mt-4"
+              >
+                <span>View SoundCloud</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </MagneticButton>
+            </div>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -569,49 +577,31 @@ const Tour = () => {
           </motion.span>
         </motion.div>
 
-        <div className="flex flex-col">
+        <div className="space-y-6">
           {TOUR_DATES.map((date, idx) => (
             <motion.div
               key={idx}
               variants={sectionChild}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ x: 8 }}
-              className="group flex flex-col md:flex-row md:items-center justify-between py-12 border-b border-white/10 hover:border-[#d97706]/50 transition-colors duration-500 cursor-default"
+              className="rounded-[2rem] border border-white/10 bg-white/5 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-white/10 transition-all duration-300"
             >
-              <div className="mb-4 md:mb-0">
-                <h3 className="text-3xl md:text-4xl font-display font-bold group-hover:text-[#d97706] transition-colors duration-300">
-                  {date.event}
-                </h3>
-                <div className="flex items-center gap-2 mt-2 text-white/50">
-                  <MapPin className="w-4 h-4" />
-                  <span className="font-light">{date.location}</span>
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12 text-center md:text-left flex-1">
+                <div className="min-w-[120px]">
+                  <p className="text-[#d97706] font-display font-bold text-2xl md:text-3xl uppercase">
+                    {date.date}
+                  </p>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-8">
-                <span className="text-xl md:text-2xl font-light tracking-wide">{date.date}</span>
-                <motion.button
-                  whileHover={{ rotate: 45, scale: 1.06 }}
-                  transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="hidden md:flex items-center justify-center w-12 h-12 rounded-full border border-white/20 group-hover:bg-white group-hover:text-black transition-all duration-300"
-                >
-                  <ArrowUpRight className="w-5 h-5" />
-                </motion.button>
+                <div className="flex-1">
+                  <h3 className="text-white font-display font-bold text-xl md:text-2xl mb-2 uppercase tracking-wide">
+                    {date.event}
+                  </h3>
+                  <div className="flex items-center justify-center md:justify-start gap-2 text-white/60">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm md:text-base">{date.location}</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
-          
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="py-12 text-center"
-          >
-            <p className="text-white/30 italic font-light">More dates to be announced.</p>
-          </motion.div>
         </div>
       </motion.div>
     </section>
@@ -650,14 +640,14 @@ const Contact = () => {
           
           <motion.div variants={sectionChild} className="flex flex-col md:flex-row items-center justify-center gap-6 mb-16">
              <MagneticButton
-              href="mailto:contact@aarjav.com"
+              href="mailto:aarjavchauhan.in@gmail.com"
               className="flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-bold hover:bg-[#d97706] hover:text-white transition-all duration-300"
             >
               <Mail className="w-5 h-5" />
               <span>Get in Touch</span>
             </MagneticButton>
             <MagneticButton
-              href="https://instagram.com"
+              href="https://www.instagram.com/aarjav.music?igsh=MTI5ZG5ieHI5bHUxMg%3D%3D"
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-8 py-4 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-all duration-300"

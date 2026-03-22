@@ -10,4 +10,16 @@ export default defineConfig({
       '/api': 'http://localhost:5174',
     },
   },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        sourcemap: false,
+        manualChunks: undefined,
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'framer-motion', 'lucide-react'],
+  },
 })
