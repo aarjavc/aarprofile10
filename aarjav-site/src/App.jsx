@@ -8,7 +8,7 @@ void motion;
 
 const ASSETS = {
   // User-specified local images
-  heroBg: "/dist/aabout.jpg", 
+  heroBg: "/aabout.jpg", 
   aboutImg: "/realAbout.jpg",
 };
 
