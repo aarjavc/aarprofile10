@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
-import { ArrowUpRight, Mail, Instagram, Music, MapPin, Play, X, ExternalLink } from 'lucide-react';
+import { ArrowUpRight, Mail, Instagram, Music, MapPin, Play, X, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 /* --- ASSETS & DATA --- */
 // `motion` is used primarily in JSX tags; this makes ESLint see it as "used".
@@ -9,7 +9,7 @@ void motion;
 const ASSETS = {
   // User-specified local images
   heroBg: "/aabout.jpg", 
-  aboutImg: "/realAbout.jpg",
+  aboutImg: "/dist/realAabout.jpg",
 };
 
 const SONGS = [
@@ -272,10 +272,6 @@ const Hero = () => {
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40" />
-          <motion.div
-            style={{ y: yLayer }}
-            className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_25%_25%,rgba(217,119,6,0.15),transparent_42%),radial-gradient(circle_at_80%_80%,rgba(99,102,241,0.14),transparent_46%)]"
-          />
         </motion.div>
       </div>
 
@@ -310,9 +306,8 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
-          className="backdrop-blur-md bg-white/5 border border-white/10 px-8 py-3 rounded-full"
         >
-          <span className="text-white/80 font-display uppercase tracking-[0.2em] text-xs md:text-sm">
+          <span className="text-white/80 font-display uppercase tracking-[0.2em] text-sm md:text-lg">
             Producer & DJ
           </span>
         </motion.div>
@@ -490,6 +485,76 @@ const Songs = () => {
   const [artworkByUrl] = useState(() =>
     Object.fromEntries(SONGS.map((s) => [s.url, LOCAL_COVERS[s.title] || null]))
   );
+  const scrollRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const scrollIntervalRef = useRef(null);
+  const scrollSpeedRef = useRef(1);
+  const speedBoostTimeoutRef = useRef(null);
+
+  // Auto-scroll effect
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    const autoScroll = () => {
+      if (!isPaused) {
+        scrollContainer.scrollLeft += scrollSpeedRef.current;
+        
+        // Calculate when to reset (at 1/3 point since we have 3 copies)
+        const maxScroll = scrollContainer.scrollWidth / 3;
+        if (scrollContainer.scrollLeft >= maxScroll * 2) {
+          scrollContainer.scrollLeft = maxScroll;
+        }
+      }
+    };
+
+    scrollIntervalRef.current = setInterval(autoScroll, 16);
+
+    return () => {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+      }
+    };
+  }, [isPaused]);
+
+  // Manual scroll function with speed boost
+  const handleScroll = (direction) => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const cardWidth = 320; // w-80 = 320px
+    const gap = 24; // gap-6 = 24px
+    const scrollAmount = cardWidth + gap;
+
+    // Boost scroll speed
+    scrollSpeedRef.current = direction === 'left' ? -8 : 8;
+
+    // Clear any existing timeout
+    if (speedBoostTimeoutRef.current) {
+      clearTimeout(speedBoostTimeoutRef.current);
+    }
+
+    // Reset speed after 1000ms
+    speedBoostTimeoutRef.current = setTimeout(() => {
+      scrollSpeedRef.current = 1;
+    }, 1000);
+
+    if (direction === 'left') {
+      container.scrollLeft -= scrollAmount;
+    } else {
+      container.scrollLeft += scrollAmount;
+    }
+
+    // Handle wrap-around after scroll completes
+    setTimeout(() => {
+      const maxScroll = container.scrollWidth / 3;
+      if (container.scrollLeft >= maxScroll * 2) {
+        container.scrollLeft = maxScroll;
+      } else if (container.scrollLeft <= 0) {
+        container.scrollLeft = maxScroll;
+      }
+    }, 400);
+  };
 
   return (
     <>
@@ -509,8 +574,8 @@ const Songs = () => {
             className="flex items-end justify-between mb-16"
           >
             <div className="flex flex-col items-center md:items-start md:flex-row md:justify-between md:w-full gap-4">
-              <h2 className="text-[10vw] md:text-8xl font-display font-bold text-[#1a1a1a] select-none leading-none text-center md:text-left">
-                ORIG<span className="text-white/10">INALS</span>
+              <h2 className="text-[10vw] md:text-8xl font-display font-bold text-white select-none leading-none text-center md:text-left">
+                ORIGINALS
               </h2>
               <MagneticButton
                 href="https://soundcloud.com/aarjavchauhan"
@@ -524,16 +589,52 @@ const Songs = () => {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SONGS.map((song, idx) => (
-              <SongCard 
-                key={idx} 
-                song={{ ...song, img: artworkByUrl[song.url] }}
-                index={idx} 
-                isLoading={false}
-                onPlay={setSelectedSong}
-              />
-            ))}
+          <div className="relative">
+            {/* Left Scroll Button */}
+            <button
+              onClick={() => handleScroll('left')}
+              onMouseDown={(e) => e.preventDefault()}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/90 backdrop-blur-sm border border-white/20 text-white p-4 rounded-full hover:bg-[#d97706] hover:border-[#d97706] transition-all duration-300 shadow-2xl hover:scale-110 active:scale-95"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            {/* Right Scroll Button */}
+            <button
+              onClick={() => handleScroll('right')}
+              onMouseDown={(e) => e.preventDefault()}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/90 backdrop-blur-sm border border-white/20 text-white p-4 rounded-full hover:bg-[#d97706] hover:border-[#d97706] transition-all duration-300 shadow-2xl hover:scale-110 active:scale-95"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            <div 
+              ref={scrollRef}
+              className="flex gap-6 overflow-x-scroll pb-6 scrollbar-hide scroll-smooth"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              {/* Triple the songs for true infinite scroll */}
+              {[...SONGS, ...SONGS, ...SONGS].map((song, idx) => (
+                <motion.div 
+                  key={`${song.title}-${idx}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="flex-none w-80 h-80"
+                >
+                  <SongCard 
+                    song={{ ...song, img: artworkByUrl[song.url] }}
+                    index={idx % SONGS.length} 
+                    isLoading={false}
+                    onPlay={setSelectedSong}
+                  />
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
       </section>
@@ -565,7 +666,7 @@ const Tour = () => {
           viewport={{ once: true }}
           className="mb-16 border-b border-white/10 pb-4 flex justify-between items-end"
         >
-          <h2 className="font-display text-4xl md:text-5xl font-bold">TOUR DATES</h2>
+          <h2 className="font-display text-4xl md:text-5xl font-bold">Live Performances</h2>
           <motion.span
             initial={{ opacity: 0, x: 14 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -586,7 +687,7 @@ const Tour = () => {
             >
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12 text-center md:text-left flex-1">
                 <div className="min-w-[120px]">
-                  <p className="text-[#d97706] font-display font-bold text-2xl md:text-3xl uppercase">
+                  <p className="text-[#d97706] font-display font-bold text-2xl md:text-3xl uppercase tracking-wider">
                     {date.date}
                   </p>
                 </div>
@@ -647,7 +748,7 @@ const Contact = () => {
               <span>Get in Touch</span>
             </MagneticButton>
             <MagneticButton
-              href="https://www.instagram.com/aarjav.music?igsh=MTI5ZG5ieHI5bHUxMg%3D%3D"
+              href="https://www.instagram.com/aarjav.music"
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-8 py-4 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-all duration-300"
@@ -698,6 +799,10 @@ export default function App() {
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        /* Hide scrollbar for horizontal scroll */
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}} />
 
       <Navbar />
