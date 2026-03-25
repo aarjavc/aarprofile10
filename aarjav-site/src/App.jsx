@@ -265,7 +265,7 @@ const Hero = () => {
           <img 
             src={ASSETS.heroBg} 
             alt="Hero Background" 
-            className="w-full h-full object-cover opacity-60 object-[center_-5%] scale-[0.92] md:scale-110 blur-md"
+            className="w-full h-full object-cover opacity-60 object-[center_-5%] scale-[0.92] md:scale-110 blur-sm"
             onError={(e) => {
               // Fallback if hero.jpg isn't found
               e.target.src = "https://images.unsplash.com/photo-1571266028243-371695039989?q=80&w=2535&auto=format&fit=crop";
@@ -487,88 +487,69 @@ const Songs = () => {
   );
   const scrollRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
-  const scrollIntervalRef = useRef(null);
-  const scrollSpeedRef = useRef(1);
-  const speedBoostTimeoutRef = useRef(null);
+  const rafRef = useRef(0);
+  const lastTsRef = useRef(0);
+  const resumeTimeoutRef = useRef(0);
+  const isUserInteractingRef = useRef(false);
 
-  // Auto-scroll effect
+  // Auto-scroll effect (mobile-safe)
   useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
+    const el = scrollRef.current;
+    if (!el) return;
 
-    let scrollPosition = scrollContainer.scrollLeft || 0;
+    const speedPxPerSec = 42;
 
-    const autoScroll = () => {
-      if (!isPaused && scrollContainer) {
-        scrollPosition += scrollSpeedRef.current;
-        
-        // Calculate when to reset (at 1/3 point since we have 3 copies)
-        const maxScroll = scrollContainer.scrollWidth / 3;
-        if (scrollPosition >= maxScroll * 2) {
-          scrollPosition = maxScroll;
+    const ensureMiddleStart = () => {
+      const maxScroll = el.scrollWidth / 3;
+      if (maxScroll > 0 && el.scrollLeft < maxScroll * 0.5) {
+        el.scrollLeft = maxScroll;
+      }
+    };
+
+    const tick = (ts) => {
+      if (!lastTsRef.current) lastTsRef.current = ts;
+      const dt = Math.min(32, ts - lastTsRef.current);
+      lastTsRef.current = ts;
+
+      if (!isPaused) {
+        ensureMiddleStart();
+
+        const next = el.scrollLeft + (speedPxPerSec * dt) / 1000;
+        el.scrollLeft = Math.round(next * 2) / 2;
+
+        const maxScroll = el.scrollWidth / 3;
+        if (maxScroll > 0 && el.scrollLeft >= maxScroll * 2) {
+          el.scrollLeft = maxScroll;
         }
-        
-        scrollContainer.scrollLeft = scrollPosition;
       }
+
+      rafRef.current = requestAnimationFrame(tick);
     };
 
-    // Use requestAnimationFrame for smoother performance on mobile
-    let animationId;
-    const animate = () => {
-      autoScroll();
-      animationId = requestAnimationFrame(animate);
-    };
-    
-    // Start animation after a short delay
-    const startTimer = setTimeout(() => {
-      animate();
-    }, 100);
-
+    rafRef.current = requestAnimationFrame(tick);
     return () => {
-      clearTimeout(startTimer);
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+      lastTsRef.current = 0;
     };
   }, [isPaused]);
 
-  // Manual scroll function with speed boost
-  const handleScroll = (direction) => {
-    const container = scrollRef.current;
-    if (!container) return;
+  const pauseThenResume = () => {
+    setIsPaused(true);
+    if (resumeTimeoutRef.current) window.clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = window.setTimeout(() => setIsPaused(false), 900);
+  };
 
-    const cardWidth = 320; // w-80 = 320px
-    const gap = 24; // gap-6 = 24px
-    const scrollAmount = cardWidth + gap;
+  const onUserStart = () => {
+    isUserInteractingRef.current = true;
+    setIsPaused(true);
+    if (resumeTimeoutRef.current) window.clearTimeout(resumeTimeoutRef.current);
+  };
 
-    // Boost scroll speed
-    scrollSpeedRef.current = direction === 'left' ? -8 : 8;
-
-    // Clear any existing timeout
-    if (speedBoostTimeoutRef.current) {
-      clearTimeout(speedBoostTimeoutRef.current);
-    }
-
-    // Reset speed after 1000ms
-    speedBoostTimeoutRef.current = setTimeout(() => {
-      scrollSpeedRef.current = 1;
-    }, 1000);
-
-    if (direction === 'left') {
-      container.scrollLeft -= scrollAmount;
-    } else {
-      container.scrollLeft += scrollAmount;
-    }
-
-    // Handle wrap-around after scroll completes
-    setTimeout(() => {
-      const maxScroll = container.scrollWidth / 3;
-      if (container.scrollLeft >= maxScroll * 2) {
-        container.scrollLeft = maxScroll;
-      } else if (container.scrollLeft <= 0) {
-        container.scrollLeft = maxScroll;
-      }
-    }, 400);
+  const onUserEnd = () => {
+    isUserInteractingRef.current = false;
+    if (resumeTimeoutRef.current) window.clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = window.setTimeout(() => setIsPaused(false), 700);
   };
 
   return (
@@ -609,7 +590,13 @@ const Songs = () => {
             <div 
               ref={scrollRef}
               className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide"
-              style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
+              style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain', touchAction: 'pan-x' }}
+              onPointerDown={onUserStart}
+              onPointerUp={onUserEnd}
+              onPointerCancel={onUserEnd}
+              onTouchStart={onUserStart}
+              onTouchEnd={onUserEnd}
+              onTouchCancel={onUserEnd}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
