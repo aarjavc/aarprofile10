@@ -9,7 +9,7 @@ void motion;
 const ASSETS = {
   // User-specified local images
   heroBg: "/aabout.jpg", 
-  aboutImg: "/realAabout.jpg",
+  aboutImg: "/dist/realAabout.jpg",
 };
 
 const SONGS = [
