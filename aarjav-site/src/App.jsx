@@ -497,7 +497,9 @@ const Songs = () => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const speedPxPerSec = 42;
+    const isCoarsePointer = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const speedPxPerSec = isCoarsePointer ? 42 : 56;
+    const roundStep = isCoarsePointer ? 0.5 : 0.25;
 
     const ensureMiddleStart = () => {
       const maxScroll = el.scrollWidth / 3;
@@ -515,7 +517,7 @@ const Songs = () => {
         ensureMiddleStart();
 
         const next = el.scrollLeft + (speedPxPerSec * dt) / 1000;
-        el.scrollLeft = Math.round(next * 2) / 2;
+        el.scrollLeft = Math.round(next / roundStep) * roundStep;
 
         const maxScroll = el.scrollWidth / 3;
         if (maxScroll > 0 && el.scrollLeft >= maxScroll * 2) {
@@ -608,7 +610,8 @@ const Songs = () => {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: false, amount: 0.3 }}
                   transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="flex-none w-80 h-80"
+                  className="flex-none w-80 h-80 will-change-transform"
+                  style={{ transform: 'translateZ(0)' }}
                 >
                   <SongCard 
                     song={{ ...song, img: artworkByUrl[song.url] }}
