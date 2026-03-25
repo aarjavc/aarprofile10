@@ -496,23 +496,38 @@ const Songs = () => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
 
+    let scrollPosition = scrollContainer.scrollLeft || 0;
+
     const autoScroll = () => {
-      if (!isPaused) {
-        scrollContainer.scrollLeft += scrollSpeedRef.current;
+      if (!isPaused && scrollContainer) {
+        scrollPosition += scrollSpeedRef.current;
         
         // Calculate when to reset (at 1/3 point since we have 3 copies)
         const maxScroll = scrollContainer.scrollWidth / 3;
-        if (scrollContainer.scrollLeft >= maxScroll * 2) {
-          scrollContainer.scrollLeft = maxScroll;
+        if (scrollPosition >= maxScroll * 2) {
+          scrollPosition = maxScroll;
         }
+        
+        scrollContainer.scrollLeft = scrollPosition;
       }
     };
 
-    scrollIntervalRef.current = setInterval(autoScroll, 16);
+    // Use requestAnimationFrame for smoother performance on mobile
+    let animationId;
+    const animate = () => {
+      autoScroll();
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    // Start animation after a short delay
+    const startTimer = setTimeout(() => {
+      animate();
+    }, 100);
 
     return () => {
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
+      clearTimeout(startTimer);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
       }
     };
   }, [isPaused]);
@@ -593,29 +608,10 @@ const Songs = () => {
 
             <div 
               ref={scrollRef}
-              className="flex gap-6 overflow-x-scroll pb-6 scrollbar-hide scroll-smooth"
+              className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide"
+              style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              onTouchStart={() => {
-                setIsPaused(true);
-                // Clear any existing resume timer
-                if (window.scrollResumeTimer) {
-                  clearTimeout(window.scrollResumeTimer);
-                }
-              }}
-              onTouchEnd={() => {
-                // Resume scrolling after a short delay to allow touch interaction
-                window.scrollResumeTimer = setTimeout(() => {
-                  setIsPaused(false);
-                }, 2000);
-              }}
-              onTouchMove={() => {
-                // Keep paused during touch move
-                setIsPaused(true);
-                if (window.scrollResumeTimer) {
-                  clearTimeout(window.scrollResumeTimer);
-                }
-              }}
             >
               {/* Triple the songs for true infinite scroll */}
               {[...SONGS, ...SONGS, ...SONGS].map((song, idx) => (
