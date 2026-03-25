@@ -9,7 +9,7 @@ void motion;
 const ASSETS = {
   // User-specified local images
   heroBg: "/aabout.jpg", 
-  aboutImg: "/dist/realAabout.jpg",
+  aboutImg: "/dist/realAbout.jpg",
 };
 
 const SONGS = [
@@ -265,7 +265,7 @@ const Hero = () => {
           <img 
             src={ASSETS.heroBg} 
             alt="Hero Background" 
-            className="w-full h-full object-cover opacity-60 object-[center_-5%] scale-[0.92] md:scale-110 blur-sm"
+            className="w-full h-full object-cover opacity-60 object-[center_-5%] scale-[0.92] md:scale-110 blur-md"
             onError={(e) => {
               // Fallback if hero.jpg isn't found
               e.target.src = "https://images.unsplash.com/photo-1571266028243-371695039989?q=80&w=2535&auto=format&fit=crop";
@@ -590,31 +590,14 @@ const Songs = () => {
           </motion.div>
 
           <div className="relative">
-            {/* Left Scroll Button */}
-            <button
-              onClick={() => handleScroll('left')}
-              onMouseDown={(e) => e.preventDefault()}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/90 backdrop-blur-sm border border-white/20 text-white p-4 rounded-full hover:bg-[#d97706] hover:border-[#d97706] transition-all duration-300 shadow-2xl hover:scale-110 active:scale-95"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            {/* Right Scroll Button */}
-            <button
-              onClick={() => handleScroll('right')}
-              onMouseDown={(e) => e.preventDefault()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/90 backdrop-blur-sm border border-white/20 text-white p-4 rounded-full hover:bg-[#d97706] hover:border-[#d97706] transition-all duration-300 shadow-2xl hover:scale-110 active:scale-95"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
 
             <div 
               ref={scrollRef}
               className="flex gap-6 overflow-x-scroll pb-6 scrollbar-hide scroll-smooth"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
             >
               {/* Triple the songs for true infinite scroll */}
               {[...SONGS, ...SONGS, ...SONGS].map((song, idx) => (
