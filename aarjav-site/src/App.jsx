@@ -596,8 +596,26 @@ const Songs = () => {
               className="flex gap-6 overflow-x-scroll pb-6 scrollbar-hide scroll-smooth"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              onTouchStart={() => setIsPaused(true)}
-              onTouchEnd={() => setIsPaused(false)}
+              onTouchStart={() => {
+                setIsPaused(true);
+                // Clear any existing resume timer
+                if (window.scrollResumeTimer) {
+                  clearTimeout(window.scrollResumeTimer);
+                }
+              }}
+              onTouchEnd={() => {
+                // Resume scrolling after a short delay to allow touch interaction
+                window.scrollResumeTimer = setTimeout(() => {
+                  setIsPaused(false);
+                }, 2000);
+              }}
+              onTouchMove={() => {
+                // Keep paused during touch move
+                setIsPaused(true);
+                if (window.scrollResumeTimer) {
+                  clearTimeout(window.scrollResumeTimer);
+                }
+              }}
             >
               {/* Triple the songs for true infinite scroll */}
               {[...SONGS, ...SONGS, ...SONGS].map((song, idx) => (
