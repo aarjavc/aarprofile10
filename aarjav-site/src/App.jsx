@@ -318,7 +318,7 @@ const Hero = () => {
 
 const About = () => {
   return (
-    <section id="about" className="relative py-32 px-4 md:px-12 bg-[#050505]">
+    <section id="about" className="relative py-16 md:py-32 px-4 md:px-12 bg-[#050505]">
       <motion.div
         variants={sectionParent}
         initial="hidden"
@@ -556,7 +556,7 @@ const Songs = () => {
 
   return (
     <>
-      <section id="songs" className="py-32 px-4 md:px-12 bg-[#050505]">
+      <section id="songs" className="py-16 md:py-32 px-4 md:px-12 bg-[#050505]">
         <motion.div
           variants={sectionParent}
           initial="hidden"
@@ -572,7 +572,7 @@ const Songs = () => {
             className="flex items-end justify-between mb-16"
           >
             <div className="flex flex-col items-center md:items-start md:flex-row md:justify-between md:w-full gap-4">
-              <h2 className="text-[10vw] md:text-8xl font-display font-bold text-white select-none leading-none text-center md:text-left">
+              <h2 className="font-display font-bold text-white select-none leading-none text-center md:text-left text-4xl sm:text-5xl md:text-5xl lg:text-6xl">
                 ORIGINALS
               </h2>
               <MagneticButton
@@ -638,7 +638,7 @@ const Songs = () => {
 
 const Tour = () => {
   return (
-    <section id="tour" className="py-32 px-4 md:px-12 bg-[#050505] text-[#ededed]">
+    <section id="tour" className="py-16 md:py-32 px-4 md:px-12 bg-[#050505] text-[#ededed]">
       <motion.div
         variants={sectionParent}
         initial="hidden"
@@ -653,7 +653,7 @@ const Tour = () => {
           viewport={{ once: true }}
           className="mb-16 border-b border-white/10 pb-4 flex justify-between items-end"
         >
-          <h2 className="font-display text-4xl md:text-5xl font-bold">Live Performances</h2>
+          <h2 className="font-display font-bold text-white select-none leading-none text-4xl sm:text-5xl md:text-5xl lg:text-6xl">Live Performances</h2>
           <motion.span
             initial={{ opacity: 0, x: 14 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -698,7 +698,7 @@ const Tour = () => {
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-20 px-4 md:px-12 bg-[#050505]">
+    <section id="contact" className="py-16 md:py-32 px-4 md:px-12 bg-[#050505]">
       <motion.div 
         variants={sectionParent}
         initial="hidden"
